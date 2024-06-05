@@ -45,4 +45,4 @@ def buscaGoodReads(query):
     soupPesquisa = BeautifulSoup(responsePesquisa.text, 'html.parser')
     primeiroResultado = soupPesquisa.find('tr', attrs={'itemtype':'http://schema.org/Book'})
     autor = primeiroResultado.find('a', class_='authorName').text
-    print('o goodreads foi usado')
+    return autor

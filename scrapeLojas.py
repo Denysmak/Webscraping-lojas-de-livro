@@ -12,9 +12,12 @@ urlSaraiva = 'https://www.saraiva.com.br' # funcionou/ retornou 200
 urlSubmarino = 'https://www.submarino.com.br/busca/' # funcionou depois do user agent
 urlEstante = 'https://www.estantevirtual.com.br' # funcionou / retornou 200
 
+listaLivros = []
 
-buscaGoodReads('o homem mais rico da babilônia')
 
+def limpaTexto(texto):
+    texto = texto.replace('.', '')
+    return texto
 
 
 #Fazer uma função diferente para cada site, mas depois de concluído, criar uma função com as partes que se repetem em todos
@@ -33,11 +36,13 @@ def checarAutor(query):
     print(autor)
 
 
-
+#nome do livro, autor, preco, loja, link
 def submarino(busca):
     #essa variável retira os espaços do query e coloca um '-' no lugar, para funcionar no link para pegar o preço mais baixo
+    resultadoAutor = buscaGoodReads(busca)
     busca = busca.replace(' ', '-')
-    responseBusca = requests.get(f'https://www.submarino.com.br/busca/{busca}?content={busca.replace("-", "%20")}&filter=%7B%22id%22%3A%22rating%22%2C%22value%22%3A%223%2C5+-+4%2C5%22%2C%22fixed%22%3Afalse%7D&sortBy=lowerPrice', headers=HEADING)
+    link = f'https://www.submarino.com.br/busca/{busca}?content={busca.replace("-", "%20")}&filter=%7B%22id%22%3A%22rating%22%2C%22value%22%3A%223%2C5+-+4%2C5%22%2C%22fixed%22%3Afalse%7D&sortBy=lowerPrice'
+    responseBusca = requests.get(link, headers=HEADING)
     soupBusca = BeautifulSoup(responseBusca.text, 'html.parser')
     #essa variável está procurando todas as tags 'a' com essa classe, que contém todas as informações dos livros
     container = soupBusca.find_all('a', class_='inStockCard__Link-sc-1ngt5zo-1 JOEpk')
@@ -45,14 +50,17 @@ def submarino(busca):
         #entrar nesse link e procurar o nome do autor, criar um response, um soup e um find usando a tag específica do nome do autor como argumento
         responseLivro = requests.get(f'https://www.submarino.com.br{i["href"]}', headers=HEADING)
         soupLivro = BeautifulSoup(responseLivro.text, 'html.parser')
-        autor = soupLivro.find('p', class_='src__AuthorUI-sc-1gt98wm-10 kOvTUY')
-        print(autor.text)
+        titulo = soupLivro.find('h1', class_='src__Title-sc-1xq3hsd-0 eEEsym').text
+        autor = soupLivro.find('p', class_='src__AuthorUI-sc-1gt98wm-10 kOvTUY').text
+        preco = soupLivro.find('div', class_='src__BestPrice-sc-1jnodg3-5 ykHPU priceSales').text.replace('R$', '').replace(',', '.').replace(' ', '')
+        if limpaTexto(autor) == limpaTexto(resultadoAutor):
+            listaLivros.append([titulo, autor, preco, link, 'Submarino'])
 
         
     
 
 try:
-    pass
+    submarino('percy jackson')
 
 
 
